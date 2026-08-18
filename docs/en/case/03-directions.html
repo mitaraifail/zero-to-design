@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse · Phase 3 Design Directions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --page-bg: #FDFBF7;
+      --page-text: #2A2A2A;
+      --page-muted: #6B6B6B;
+      --page-border: #E8E5DE;
+      --accent: #5B8A5E;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", system-ui, sans-serif;
+      background: var(--page-bg);
+      color: var(--page-text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-header {
+      padding: 48px 32px 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .page-header h1 {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: var(--page-muted);
+      font-size: 16px;
+      max-width: 720px;
+    }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 32px 96px;
+    }
+
+    /* Product analysis card */
+    .product-analysis {
+      background: #FFFFFF;
+      border: 1px solid var(--page-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .product-analysis h2 {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-analysis h2::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .analysis-item dt {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--page-muted);
+      margin-bottom: 6px;
+    }
+
+    .analysis-item dd {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* Directions grid */
+    .directions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .directions-grid { grid-template-columns: 1fr; }
+      main, .page-header { padding-left: 20px; padding-right: 20px; }
+    }
+
+    .direction-card {
+      background: #FFFFFF;
+      border: 1px solid var(--page-border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .direction-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .direction-header h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      line-height: 1.2;
+    }
+
+    .direction-header .pitch {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      opacity: 0.85;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin: 0 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .info-badge {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: help;
+      font-family: "JetBrains Mono", monospace;
+      line-height: 1;
+    }
+
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
+      line-height: 1.5;
+      white-space: normal;
+      width: 240px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .info-badge:hover + .tooltip,
+    .info-badge:focus + .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .section-body {
+      padding-left: 2px;
+    }
+
+    .rationale {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .color-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .layer-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .swatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .swatch {
+      flex: 1;
+      min-width: 72px;
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .swatch-color {
+      height: 32px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .swatch-name {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .swatch-token {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    .typography-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .type-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .type-spec {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      opacity: 0.75;
+    }
+
+    .layout-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .signature-text {
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .mockup-frame {
+      border-radius: 14px;
+      border: 1px solid;
+      overflow: hidden;
+      margin-top: 4px;
+      min-height: 320px;
+    }
+
+    /* Direction A: Morning Paper */
+    .direction-a {
+      --a-bg: #FDFBF7;
+      --a-text: #2A2A2A;
+      --a-text-secondary: #6B6B6B;
+      --a-accent: #5B8A5E;
+      --a-card: #FFFFFF;
+      --a-border: #EBE8E0;
+      --a-ok: #5B8A5E;
+      --a-warn: #C4893A;
+      --a-error: #B84A39;
+      --a-badge: #F0F4EF;
+    }
+
+    .direction-a .direction-letter { background: var(--a-badge); color: var(--a-accent); }
+    .direction-a .direction-header h3 { font-family: "Bricolage Grotesque", sans-serif; color: var(--a-text); }
+    .direction-a .pitch { color: var(--a-text-secondary); }
+    .direction-a .section-title { color: var(--a-accent); }
+    .direction-a .info-badge { background: var(--a-badge); color: var(--a-accent); }
+    .direction-a .tooltip { background: var(--a-card); color: var(--a-text); border: 1px solid var(--a-border); }
+
+    .direction-a .mockup-frame {
+      background: var(--a-bg);
+      border-color: var(--a-border);
+      font-family: "Manrope", sans-serif;
+      color: var(--a-text);
+    }
+
+    .mockup-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--a-border);
+      background: var(--a-card);
+    }
+
+    .mockup-logo {
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mockup-logo::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--a-accent);
+    }
+
+    .mockup-nav-links {
+      display: flex;
+      gap: 14px;
+      font-size: 11px;
+      color: var(--a-text-secondary);
+    }
+
+    .mockup-body {
+      padding: 16px;
+    }
+
+    .mockup-summary {
+      background: var(--a-card);
+      border: 1px solid var(--a-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .direction-a .mockup-summary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      box-shadow: 0 0 0 0 rgba(91, 138, 94, 0);
+      animation: calmPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes calmPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(91, 138, 94, 0); }
+      50% { box-shadow: 0 0 28px 2px rgba(91, 138, 94, 0.08); }
+    }
+
+    .mockup-date {
+      font-size: 11px;
+      color: var(--a-text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .mockup-headline {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .mockup-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mockup-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mockup-metric-value {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .mockup-metric-label {
+      font-size: 10px;
+      color: var(--a-text-secondary);
+    }
+
+    .mockup-metric-change {
+      font-size: 10px;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--a-ok);
+    }
+
+    .mockup-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mockup-card {
+      background: var(--a-card);
+      border: 1px solid var(--a-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .mockup-card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--a-text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .mockup-event {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--a-border);
+      font-size: 11px;
+    }
+
+    .mockup-event:last-child { border-bottom: none; }
+
+    .mockup-event-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--a-accent);
+      flex-shrink: 0;
+    }
+
+    .mockup-event-text { flex: 1; }
+    .mockup-event-time { color: var(--a-text-secondary); font-family: "JetBrains Mono", monospace; font-size: 10px; }
+
+    .mockup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mockup-chip {
+      padding: 5px 9px;
+      border-radius: 6px;
+      background: var(--a-badge);
+      color: var(--a-accent);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Direction B: Signal & Noise */
+    .direction-b {
+      --b-bg: #F8F7F4;
+      --b-text: #1A1A1A;
+      --b-text-secondary: #757575;
+      --b-accent: #C45D3A;
+      --b-card: #FFFFFF;
+      --b-border: #E5E3DD;
+      --b-ok: #4A7C59;
+      --b-warn: #C4893A;
+      --b-error: #C45D3A;
+      --b-badge: #FDF0EC;
+      --b-muted: #BFBDB6;
+    }
+
+    .direction-b .direction-letter { background: var(--b-badge); color: var(--b-accent); }
+    .direction-b .direction-header h3 { font-family: "Bricolage Grotesque", sans-serif; color: var(--b-text); }
+    .direction-b .pitch { color: var(--b-text-secondary); }
+    .direction-b .section-title { color: var(--b-accent); }
+    .direction-b .info-badge { background: var(--b-badge); color: var(--b-accent); }
+    .direction-b .tooltip { background: var(--b-card); color: var(--b-text); border: 1px solid var(--b-border); }
+
+    .direction-b .mockup-frame {
+      background: var(--b-bg);
+      border-color: var(--b-border);
+      font-family: "Manrope", sans-serif;
+      color: var(--b-text);
+    }
+
+    .direction-b .mockup-nav {
+      background: var(--b-card);
+      border-color: var(--b-border);
+    }
+
+    .direction-b .mockup-logo::before { background: var(--b-accent); }
+    .direction-b .mockup-nav-links { color: var(--b-text-secondary); }
+
+    .direction-b .mockup-body { padding: 16px; }
+
+    .direction-b .mockup-row-b {
+      display: grid;
+      grid-template-columns: 55% 45%;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .direction-b .focus-panel {
+      background: var(--b-card);
+      border: 1px solid var(--b-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .direction-b .focus-date {
+      font-size: 10px;
+      color: var(--b-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .direction-b .focus-headline {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .direction-b .focus-metric {
+      margin-bottom: 16px;
+      opacity: 0.55;
+      animation: focusReveal 1.4s ease-out 0.4s forwards;
+    }
+
+    .direction-b .focus-metric.attention {
+      opacity: 1;
+      animation: focusReveal 1.4s ease-out 0.9s forwards;
+    }
+
+    .direction-b .focus-metric-value {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 4px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .direction-b .focus-metric.attention .focus-metric-value::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 2px;
+      width: 0;
+      height: 3px;
+      background: var(--b-accent);
+      border-radius: 2px;
+      animation: drawUnderline 0.7s ease-out 1.5s forwards;
+    }
+
+    @keyframes focusReveal {
+      from { opacity: 0.35; filter: blur(1px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+
+    @keyframes drawUnderline {
+      to { width: 100%; }
+    }
+
+    .direction-b .focus-metric-label {
+      font-size: 11px;
+      color: var(--b-text-secondary);
+      margin-bottom: 3px;
+    }
+
+    .direction-b .focus-metric-change {
+      font-size: 10px;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .direction-b .focus-metric.attention .focus-metric-change { color: var(--b-accent); }
+    .direction-b .focus-metric:not(.attention) .focus-metric-change { color: var(--b-ok); }
+
+    .direction-b .feed-panel {
+      background: var(--b-card);
+      border: 1px solid var(--b-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .direction-b .feed-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    .direction-b .feed-event {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--b-border);
+      font-size: 11px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .direction-b .feed-event:last-child { border-bottom: none; }
+    .direction-b .feed-event-tag { color: var(--b-accent); font-weight: 600; flex-shrink: 0; }
+    .direction-b .feed-event-text { color: var(--b-text-secondary); }
+
+    /* Direction C: Monocle Desk */
+    .direction-c {
+      --c-bg: #F5F4F0;
+      --c-text: #1F1F1F;
+      --c-text-secondary: #5C5C5C;
+      --c-accent: #2D5A3D;
+      --c-card: #FAFAF8;
+      --c-border: #DEDCD5;
+      --c-ok: #2D5A3D;
+      --c-warn: #9A6B2B;
+      --c-error: #8B3A2E;
+      --c-badge: #E8EDE9;
+    }
+
+    .direction-c .direction-letter { background: var(--c-badge); color: var(--c-accent); }
+    .direction-c .direction-header h3 { font-family: "Source Serif 4", serif; color: var(--c-text); }
+    .direction-c .pitch { color: var(--c-text-secondary); }
+    .direction-c .section-title { color: var(--c-accent); }
+    .direction-c .info-badge { background: var(--c-badge); color: var(--c-accent); }
+    .direction-c .tooltip { background: var(--c-card); color: var(--c-text); border: 1px solid var(--c-border); }
+
+    .direction-c .mockup-frame {
+      background: var(--c-bg);
+      border-color: var(--c-border);
+      font-family: "Manrope", sans-serif;
+      color: var(--c-text);
+    }
+
+    .direction-c .mockup-nav {
+      background: var(--c-card);
+      border-color: var(--c-border);
+    }
+
+    .direction-c .mockup-logo { font-family: "Source Serif 4", serif; }
+    .direction-c .mockup-logo::before { background: var(--c-accent); }
+    .direction-c .mockup-nav-links { color: var(--c-text-secondary); }
+
+    .direction-c .masthead {
+      padding: 16px;
+      border-bottom: 1px solid var(--c-border);
+      position: relative;
+    }
+
+    .direction-c .masthead::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 0;
+      height: 1px;
+      background: var(--c-border);
+      width: 0;
+      animation: ruleDraw 0.8s ease-out 0.2s forwards;
+    }
+
+    @keyframes ruleDraw {
+      to { width: calc(100% - 32px); }
+    }
+
+    .direction-c .masthead-title {
+      font-family: "Source Serif 4", serif;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .direction-c .masthead-date {
+      font-size: 11px;
+      color: var(--c-text-secondary);
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .direction-c .metric-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--c-border);
+      position: relative;
+    }
+
+    .direction-c .metric-band::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 1px;
+      background: var(--c-border);
+      width: 0;
+      animation: ruleDraw 0.8s ease-out 0.6s forwards;
+    }
+
+    .direction-c .band-metric {
+      padding: 14px 12px;
+      border-right: 1px solid var(--c-border);
+      position: relative;
+    }
+
+    .direction-c .band-metric::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 1px;
+      height: 0;
+      background: var(--c-border);
+      animation: ruleDrawV 0.6s ease-out 1s forwards;
+    }
+
+    @keyframes ruleDrawV {
+      to { height: 100%; }
+    }
+
+    .direction-c .band-metric:last-child { border-right: none; }
+    .direction-c .band-metric:last-child::after { display: none; }
+
+    .direction-c .band-value {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .direction-c .band-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--c-text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .direction-c .band-change {
+      font-size: 10px;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--c-ok);
+    }
+
+    .direction-c .c-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 180px;
+    }
+
+    .direction-c .c-column {
+      padding: 14px;
+      border-right: 1px solid var(--c-border);
+      position: relative;
+    }
+
+    .direction-c .c-column::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 1px;
+      height: 0;
+      background: var(--c-border);
+      animation: ruleDrawV 0.6s ease-out 1.2s forwards;
+    }
+
+    .direction-c .c-column:last-child { border-right: none; }
+    .direction-c .c-column:last-child::after { display: none; }
+
+    .direction-c .c-col-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--c-text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .direction-c .c-event {
+      font-size: 11px;
+      padding: 6px 0;
+      border-bottom: 1px dotted var(--c-border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .direction-c .c-event:last-child { border-bottom: none; }
+
+    /* Direction D: Soft Utility */
+    .direction-d {
+      --d-bg: #FDFDFC;
+      --d-text: #2D2D2D;
+      --d-text-secondary: #6E6E6E;
+      --d-accent: #4A7C59;
+      --d-card: #FFFFFF;
+      --d-border: #E8E8E6;
+      --d-ok: #4A7C59;
+      --d-warn: #B8832E;
+      --d-error: #B34A3C;
+      --d-badge: #EDF2EE;
+    }
+
+    .direction-d .direction-letter { background: var(--d-badge); color: var(--d-accent); }
+    .direction-d .direction-header h3 { font-family: "Manrope", sans-serif; color: var(--d-text); }
+    .direction-d .pitch { color: var(--d-text-secondary); }
+    .direction-d .section-title { color: var(--d-accent); }
+    .direction-d .info-badge { background: var(--d-badge); color: var(--d-accent); }
+    .direction-d .tooltip { background: var(--d-card); color: var(--d-text); border: 1px solid var(--d-border); }
+
+    .direction-d .mockup-frame {
+      background: var(--d-bg);
+      border-color: var(--d-border);
+      font-family: "Manrope", sans-serif;
+      color: var(--d-text);
+    }
+
+    .direction-d .mockup-nav {
+      background: var(--d-card);
+      border-color: var(--d-border);
+    }
+
+    .direction-d .mockup-logo::before { background: var(--d-accent); }
+    .direction-d .mockup-nav-links { color: var(--d-text-secondary); }
+
+    .direction-d .d-body { padding: 16px; }
+
+    .direction-d .welcome-card {
+      background: var(--d-card);
+      border: 1px solid var(--d-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .direction-d .welcome-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+    }
+
+    .direction-d .welcome-card:active {
+      transform: translateY(-1px);
+    }
+
+    .direction-d .welcome-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .direction-d .welcome-sub {
+      font-size: 12px;
+      color: var(--d-text-secondary);
+    }
+
+    .direction-d .metric-grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .direction-d .d-metric-card {
+      background: var(--d-card);
+      border: 1px solid var(--d-border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .direction-d .d-metric-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+    }
+
+    .direction-d .d-metric-card:active {
+      transform: translateY(-1px);
+    }
+
+    .direction-d .d-metric-value {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .direction-d .d-metric-label {
+      font-size: 11px;
+      color: var(--d-text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .direction-d .d-metric-change {
+      font-size: 10px;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--d-ok);
+    }
+
+    .direction-d .d-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .direction-d .d-chip {
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: var(--d-badge);
+      color: var(--d-accent);
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid var(--d-border);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .direction-d .d-chip:hover {
+      transform: translateY(-2px);
+      background: #E2EBE4;
+    }
+
+    .direction-d .d-events {
+      background: var(--d-card);
+      border: 1px solid var(--d-border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .direction-d .d-event {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--d-border);
+      font-size: 11px;
+    }
+
+    .direction-d .d-event:last-child { border-bottom: none; }
+
+    .selection-hint {
+      margin-top: 48px;
+      padding: 24px;
+      background: #FFFFFF;
+      border: 1px solid var(--page-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .selection-hint h3 {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: 18px;
+      margin: 0 0 12px;
+    }
+
+    .selection-hint p, .selection-hint li {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--page-muted);
+    }
+
+    .selection-hint ul { margin: 8px 0 0; padding-left: 18px; }
+    .selection-hint li { margin-bottom: 6px; }
+
+    code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+      background: rgba(0,0,0,0.04);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Pulse · Phase 3 Design Directions</h1>
+    <p>Based on the product definition and reference collection, we generated 4 distinct design-language directions. Each direction includes color, typography, layout, signature motion, and a mini interface preview. Pick one, or combine elements from multiple directions.</p>
+  </header>
+
+  <main>
+    <section class="product-analysis">
+      <h2>Product Analysis</h2>
+      <dl class="analysis-grid">
+        <div class="analysis-item">
+          <dt>One-liner</dt>
+          <dd>Roll revenue, user, and event data into a clear homepage—know in 30 seconds every morning whether anything is off.</dd>
+        </div>
+        <div class="analysis-item">
+          <dt>Target Users</dt>
+          <dd>Indie developers / one-person companies aged 25–40, currently checking numbers manually across Stripe, GA, SQL, and Excel.</dd>
+        </div>
+        <div class="analysis-item">
+          <dt>Core Mood</dt>
+          <dd>Calm + Speed: reduce anxiety, glance and go.</dd>
+        </div>
+        <div class="analysis-item">
+          <dt>Key Differentiator</dt>
+          <dd>Proactively surface the "today status" every morning instead of waiting for users to dig for it.</dd>
+        </div>
+        <div class="analysis-item">
+          <dt>Conversion Goal</dt>
+          <dd>Default state: scan in 30 seconds and leave. Anomaly state: spot it at a glance and drill down in one click.</dd>
+        </div>
+        <div class="analysis-item">
+          <dt>Aesthetic Constraints</dt>
+          <dd>Light mode only; no purple, no blue as primary, no gradients.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="directions-grid">
+      <!-- Direction A: Morning Paper -->
+      <article class="direction-card direction-a">
+        <div class="direction-header">
+          <h3><span class="direction-letter">A</span>Morning Paper</h3>
+          <p class="pitch">Open Pulse like a morning paper: warm, clear, today’s status read in one glance.</p>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Direction Rationale
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Why this direction fits Pulse: building on Phase 1’s Calm + Speed and your Phase 2 preference for Monocle’s "order within calm," it uses a warm neutral base + green status color to turn anxious mornings into a predictable 30-second ritual.</span>
+          </h4>
+          <div class="section-body">
+            <p class="rationale">Takes Monocle’s editorial order but replaces cool gray with a softer warm-white base; a subtle "normal heartbeat" motion echoes Calm, making the default state feel steady and unobtrusive.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Color System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Core Palette is the 3–4 dominant colors seen at first glance; UI Semantic Tokens are color variables named by UI role, e.g., surface-card for card backgrounds, border-subtle for light borders.</span>
+          </h4>
+          <div class="section-body">
+            <div class="color-layers">
+              <div>
+                <div class="layer-label">Core Palette</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FDFBF7"></div>
+                    <div class="swatch-name">bg-page</div>
+                    <div class="swatch-token">#FDFBF7</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#2A2A2A"></div>
+                    <div class="swatch-name">text-primary</div>
+                    <div class="swatch-token">#2A2A2A</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#5B8A5E"></div>
+                    <div class="swatch-name">accent</div>
+                    <div class="swatch-token">#5B8A5E</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="layer-label">UI Semantic Tokens</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FFFFFF"></div>
+                    <div class="swatch-name">surface-card</div>
+                    <div class="swatch-token">#FFFFFF</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#EBE8E0"></div>
+                    <div class="swatch-name">border-subtle</div>
+                    <div class="swatch-token">#EBE8E0</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#6B6B6B"></div>
+                    <div class="swatch-name">text-secondary</div>
+                    <div class="swatch-token">#6B6B6B</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#F0F4EF"></div>
+                    <div class="swatch-name">badge-bg</div>
+                    <div class="swatch-token">#F0F4EF</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Typography System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Display is for large headings, Body for running text, Mono for numbers, code, and labels. Each typeface is annotated with weight, size, and line height.</span>
+          </h4>
+          <div class="section-body">
+            <div class="typography-list">
+              <div class="type-row">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;">Display</span>
+                <span class="type-spec">"Bricolage Grotesque" 700 40px/1.15</span>
+                <span style="font-size:11px;color:var(--a-text-secondary)">For page headlines; slightly humanistic, never cold.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'Manrope',sans-serif;font-weight:400;font-size:14px;">Body</span>
+                <span class="type-spec">"Manrope" 400 15px/1.55</span>
+                <span style="font-size:11px;color:var(--a-text-secondary)">For body text and card content; clear and readable.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;">Mono</span>
+                <span class="type-spec">"JetBrains Mono" 500 14px/1.4</span>
+                <span style="font-size:11px;color:var(--a-text-secondary)">Amounts, percentages, timestamps.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Layout Pattern
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">How key areas are organized: Hero is the above-the-fold visual area, CTA is the call-to-action area, listing area is the content-list area.</span>
+          </h4>
+          <div class="section-body">
+            <p class="layout-desc">Top nav + full-width "Today" summary card (taking up 50% of the first screen) with 3 key metrics; below, a two-column split: recent event stream on the left, quick actions on the right. Strategy: put the "glance" at the top and the "tap again" below.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Signature Motion
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">The most memorable micro-animation in this direction. Hover over the summary card in the mini preview, or watch the gentle glow rhythm after the page loads.</span>
+          </h4>
+          <div class="section-body">
+            <p class="signature-text"><strong>Calm Pulse:</strong> When all metrics are normal, the "Today" summary card emits an extremely soft green ambient pulse, like a steady heartbeat. It is not an alert; it tells the user "the system is watching for you." Once an anomaly appears, the pulse stops and the relevant metric gets a soft solid highlight to guide the drill-down.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Interface Preview
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">A mini homepage built with real colors, type, and layout so you can tell at a glance if this direction suits you.</span>
+          </h4>
+          <div class="mockup-frame">
+            <div class="mockup-nav">
+              <div class="mockup-logo">Pulse</div>
+              <div class="mockup-nav-links">
+                <span>Home</span>
+                <span>Events</span>
+                <span>Settings</span>
+              </div>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-summary">
+                <div class="mockup-date">Today’s Summary · Monday, August 11</div>
+                <div class="mockup-headline">Product status is normal today</div>
+                <div class="mockup-metrics">
+                  <div class="mockup-metric">
+                    <div class="mockup-metric-value" style="color:var(--a-text)">$1,240</div>
+                    <div class="mockup-metric-label">Revenue</div>
+                    <div class="mockup-metric-change">+12%</div>
+                  </div>
+                  <div class="mockup-metric">
+                    <div class="mockup-metric-value" style="color:var(--a-text)">482</div>
+                    <div class="mockup-metric-label">Active Users</div>
+                    <div class="mockup-metric-change">+5%</div>
+                  </div>
+                  <div class="mockup-metric">
+                    <div class="mockup-metric-value" style="color:var(--a-text)">24</div>
+                    <div class="mockup-metric-label">New Sign-ups</div>
+                    <div class="mockup-metric-change">-2%</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mockup-row">
+                <div class="mockup-card">
+                  <div class="mockup-card-title">Recent Events</div>
+                  <div class="mockup-event"><div class="mockup-event-dot"></div><div class="mockup-event-text">New "Export CSV" feature used 38 times</div><div class="mockup-event-time">2h</div></div>
+                  <div class="mockup-event"><div class="mockup-event-dot"></div><div class="mockup-event-text">Stripe received a $99 subscription</div><div class="mockup-event-time">4h</div></div>
+                  <div class="mockup-event"><div class="mockup-event-dot"></div><div class="mockup-event-text">Page-load optimization shipped yesterday</div><div class="mockup-event-time">12h</div></div>
+                </div>
+                <div class="mockup-card">
+                  <div class="mockup-card-title">Quick Actions</div>
+                  <div class="mockup-actions">
+                    <span class="mockup-chip">Connect Data Source</span>
+                    <span class="mockup-chip">View Report</span>
+                    <span class="mockup-chip">Invite Member</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Direction B: Signal & Noise -->
+      <article class="direction-card direction-b">
+        <div class="direction-header">
+          <h3><span class="direction-letter">B</span>Signal & Noise</h3>
+          <p class="pitch">Automatically dims normal numbers and pushes only what "needs your eyes" to the front.</p>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Direction Rationale
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Why this direction fits Pulse: it directly echoes Phase 1’s core differentiator—"proactively tell you today’s status"—using visual weight to express priority.</span>
+          </h4>
+          <div class="section-body">
+            <p class="rationale">Takes "scan and go" to the extreme: normal metrics fade in first and stay low-contrast; metrics needing attention arrive last and get emphasized. The coral accent only appears when something is off, staying nearly invisible on normal days.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Color System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Core Palette is the 3–4 dominant colors seen at first glance; UI Semantic Tokens are color variables named by UI role.</span>
+          </h4>
+          <div class="section-body">
+            <div class="color-layers">
+              <div>
+                <div class="layer-label">Core Palette</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#F8F7F4"></div>
+                    <div class="swatch-name">bg-page</div>
+                    <div class="swatch-token">#F8F7F4</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#1A1A1A"></div>
+                    <div class="swatch-name">text-primary</div>
+                    <div class="swatch-token">#1A1A1A</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#C45D3A"></div>
+                    <div class="swatch-name">accent</div>
+                    <div class="swatch-token">#C45D3A</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="layer-label">UI Semantic Tokens</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FFFFFF"></div>
+                    <div class="swatch-name">surface-card</div>
+                    <div class="swatch-token">#FFFFFF</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#E5E3DD"></div>
+                    <div class="swatch-name">border-subtle</div>
+                    <div class="swatch-token">#E5E3DD</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#757575"></div>
+                    <div class="swatch-name">text-secondary</div>
+                    <div class="swatch-token">#757575</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FDF0EC"></div>
+                    <div class="swatch-name">badge-bg</div>
+                    <div class="swatch-token">#FDF0EC</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Typography System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Display is for large headings, Body for running text, Mono for numbers, code, and labels.</span>
+          </h4>
+          <div class="section-body">
+            <div class="typography-list">
+              <div class="type-row">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;">Display</span>
+                <span class="type-spec">"Bricolage Grotesque" 800 48px/1.1</span>
+                <span style="font-size:11px;color:var(--b-text-secondary)">Oversized headlines that establish strong information hierarchy.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'Manrope',sans-serif;font-weight:500;font-size:14px;">Body</span>
+                <span class="type-spec">"Manrope" 500 15px/1.5</span>
+                <span style="font-size:11px;color:var(--b-text-secondary)">Medium weight makes data cards feel fuller.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;">Mono</span>
+                <span class="type-spec">"JetBrains Mono" 600 16px/1.3</span>
+                <span style="font-size:11px;color:var(--b-text-secondary)">Amounts and percentages are bolder and easier to scan.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Layout Pattern
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">How key areas are organized.</span>
+          </h4>
+          <div class="section-body">
+            <p class="layout-desc">Asymmetric two-column: the left 55% is a giant "Today" panel with 3 oversized metrics; the right 45% is the event stream. Normal metrics shrink their presence; anomalies are amplified. Strategy: use visual weight to directly express "what deserves your attention."</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Signature Motion
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">The most memorable micro-animation in this direction. Watch how the numbers come into focus one by one as the page loads.</span>
+          </h4>
+          <div class="section-body">
+            <p class="signature-text"><strong>Focus Reveal:</strong> On page load, all metrics appear low-contrast and slightly blurred; normal metrics quickly settle into a readable but unobtrusive state; metrics needing attention come into focus last, accompanied by a left-to-right drawn underline. It turns "proactive alerting" into visual storytelling instead of a popup interruption.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Interface Preview
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">A mini homepage built with real colors, type, and layout.</span>
+          </h4>
+          <div class="mockup-frame">
+            <div class="mockup-nav">
+              <div class="mockup-logo">Pulse</div>
+              <div class="mockup-nav-links">
+                <span>Home</span>
+                <span>Events</span>
+                <span>Settings</span>
+              </div>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-row-b">
+                <div class="focus-panel">
+                  <div class="focus-date">Today’s Status · August 11</div>
+                  <div class="focus-headline">Attention Needed</div>
+                  <div class="focus-metric">
+                    <div class="focus-metric-label">Revenue</div>
+                    <div class="focus-metric-value">$842</div>
+                    <div class="focus-metric-change">-18% vs yesterday</div>
+                  </div>
+                  <div class="focus-metric attention">
+                    <div class="focus-metric-label">Active Users</div>
+                    <div class="focus-metric-value">312</div>
+                    <div class="focus-metric-change">-35% vs yesterday</div>
+                  </div>
+                  <div class="focus-metric">
+                    <div class="focus-metric-label">New Sign-ups</div>
+                    <div class="focus-metric-value">19</div>
+                    <div class="focus-metric-change">+3%</div>
+                  </div>
+                </div>
+                <div class="feed-panel">
+                  <div class="feed-title">Recent Events</div>
+                  <div class="feed-event"><span class="feed-event-tag">Alert</span><span class="feed-event-text">Active users dropped sharply at 09:00</span></div>
+                  <div class="feed-event"><span class="feed-event-tag">Revenue</span><span class="feed-event-text">Received a $49 subscription</span></div>
+                  <div class="feed-event"><span class="feed-event-tag">Event</span><span class="feed-event-text">Export CSV used 12 times</span></div>
+                  <div class="feed-event"><span class="feed-event-tag">Product</span><span class="feed-event-text">Page-load optimization is live</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Direction C: Monocle Desk -->
+      <article class="direction-card direction-c">
+        <div class="direction-header">
+          <h3><span class="direction-letter">C</span>Monocle Desk</h3>
+          <p class="pitch">Editorial desk: using rules, whitespace, and density to arrange data into a calm, readable morning paper.</p>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Direction Rationale
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Why this direction fits Pulse: closest to your favorite Monocle reference from Phase 2—editorial feel + balanced information density.</span>
+          </h4>
+          <div class="section-body">
+            <p class="rationale">Translates the magazine language of "masthead + columns + hairline rules" into a data dashboard. Serif headings bring a humanistic editorial tone; forest-green accent replaces cold blue, making the whole feel cultured without being luxurious.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Color System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Core Palette is the 3–4 dominant colors seen at first glance; UI Semantic Tokens are color variables named by UI role.</span>
+          </h4>
+          <div class="section-body">
+            <div class="color-layers">
+              <div>
+                <div class="layer-label">Core Palette</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#F5F4F0"></div>
+                    <div class="swatch-name">bg-page</div>
+                    <div class="swatch-token">#F5F4F0</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#1F1F1F"></div>
+                    <div class="swatch-name">text-primary</div>
+                    <div class="swatch-token">#1F1F1F</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#2D5A3D"></div>
+                    <div class="swatch-name">accent</div>
+                    <div class="swatch-token">#2D5A3D</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="layer-label">UI Semantic Tokens</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FAFAF8"></div>
+                    <div class="swatch-name">surface-card</div>
+                    <div class="swatch-token">#FAFAF8</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#DEDCD5"></div>
+                    <div class="swatch-name">border-subtle</div>
+                    <div class="swatch-token">#DEDCD5</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#5C5C5C"></div>
+                    <div class="swatch-name">text-secondary</div>
+                    <div class="swatch-token">#5C5C5C</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#E8EDE9"></div>
+                    <div class="swatch-name">badge-bg</div>
+                    <div class="swatch-token">#E8EDE9</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Typography System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Display is for large headings, Body for running text, Mono for numbers, code, and labels.</span>
+          </h4>
+          <div class="section-body">
+            <div class="typography-list">
+              <div class="type-row">
+                <span style="font-family:'Source Serif 4',serif;font-weight:600;font-size:20px;">Display</span>
+                <span class="type-spec">"Source Serif 4" 600 44px/1.2</span>
+                <span style="font-size:11px;color:var(--c-text-secondary)">Serif headings echo Monocle’s editorial temperament.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'Manrope',sans-serif;font-weight:400;font-size:14px;">Body</span>
+                <span class="type-spec">"Manrope" 400 15px/1.6</span>
+                <span style="font-size:11px;color:var(--c-text-secondary)">Body stays sans-serif to keep data readable.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;">Mono</span>
+                <span class="type-spec">"JetBrains Mono" 500 14px/1.4</span>
+                <span style="font-size:11px;color:var(--c-text-secondary)">Data and masthead dates.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Layout Pattern
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">How key areas are organized.</span>
+          </h4>
+          <div class="section-body">
+            <p class="layout-desc">Top masthead (logo + date); below, a 4-column metric band separated by vertical rules; further below, a left-right two-column split separated by vertical rules. Hairline rules are the core structural language. Strategy: establish order with rules, not by stacking cards.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Signature Motion
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">The most memorable micro-animation in this direction. Watch how hairline rules draw the grid themselves as the page loads.</span>
+          </h4>
+          <div class="section-body">
+            <p class="signature-text"><strong>Rules Draw:</strong> After page load, horizontal and vertical hairline rules extend left-to-right and top-to-bottom as if drawn by a ruler. It turns "order" from static to dynamic, implying "data is being organized into a clean daily report."</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Interface Preview
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">A mini homepage built with real colors, type, and layout.</span>
+          </h4>
+          <div class="mockup-frame">
+            <div class="mockup-nav">
+              <div class="mockup-logo">Pulse</div>
+              <div class="mockup-nav-links">
+                <span>Home</span>
+                <span>Events</span>
+                <span>Settings</span>
+              </div>
+            </div>
+            <div class="masthead">
+              <div class="masthead-title">Pulse</div>
+              <div class="masthead-date">Monday 11 August 2026</div>
+            </div>
+            <div class="metric-band">
+              <div class="band-metric">
+                <div class="band-label">Revenue</div>
+                <div class="band-value">$1,240</div>
+                <div class="band-change">+12%</div>
+              </div>
+              <div class="band-metric">
+                <div class="band-label">Active Users</div>
+                <div class="band-value">482</div>
+                <div class="band-change">+5%</div>
+              </div>
+              <div class="band-metric">
+                <div class="band-label">New Sign-ups</div>
+                <div class="band-value">24</div>
+                <div class="band-change">-2%</div>
+              </div>
+              <div class="band-metric">
+                <div class="band-label">Events</div>
+                <div class="band-value">3.2k</div>
+                <div class="band-change">+8%</div>
+              </div>
+            </div>
+            <div class="c-body">
+              <div class="c-column">
+                <div class="c-col-title">Recent Events</div>
+                <div class="c-event"><span>Received $99 subscription</span><span>2h</span></div>
+                <div class="c-event"><span>Export CSV ×38</span><span>3h</span></div>
+                <div class="c-event"><span>Page optimization shipped</span><span>12h</span></div>
+              </div>
+              <div class="c-column">
+                <div class="c-col-title">Quick Actions</div>
+                <div class="c-event"><span>Connect Stripe</span></div>
+                <div class="c-event"><span>View Weekly Report</span></div>
+                <div class="c-event"><span>Set Alerts</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Direction D: Soft Utility -->
+      <article class="direction-card direction-d">
+        <div class="direction-header">
+          <h3><span class="direction-letter">D</span>Soft Utility</h3>
+          <p class="pitch">Friendly, tool-like, tactile: like a tidy desk where cards guard the gates for you.</p>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Direction Rationale
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Why this direction fits Pulse: a counterpoint to Monocle’s editorial feel, testing whether you prefer a more approachable, tool-like dashboard.</span>
+          </h4>
+          <div class="section-body">
+            <p class="rationale">Counter direction: no hairline rules or serif; instead, soft cards, rounded corners, and hover feedback. It feels closer to the intuition of common SaaS dashboards, but warm green and restrained shadows avoid "enterprise coldness."</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Color System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Core Palette is the 3–4 dominant colors seen at first glance; UI Semantic Tokens are color variables named by UI role.</span>
+          </h4>
+          <div class="section-body">
+            <div class="color-layers">
+              <div>
+                <div class="layer-label">Core Palette</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FDFDFC"></div>
+                    <div class="swatch-name">bg-page</div>
+                    <div class="swatch-token">#FDFDFC</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#2D2D2D"></div>
+                    <div class="swatch-name">text-primary</div>
+                    <div class="swatch-token">#2D2D2D</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#4A7C59"></div>
+                    <div class="swatch-name">accent</div>
+                    <div class="swatch-token">#4A7C59</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="layer-label">UI Semantic Tokens</div>
+                <div class="swatch-row">
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#FFFFFF"></div>
+                    <div class="swatch-name">surface-card</div>
+                    <div class="swatch-token">#FFFFFF</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#E8E8E6"></div>
+                    <div class="swatch-name">border-subtle</div>
+                    <div class="swatch-token">#E8E8E6</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#6E6E6E"></div>
+                    <div class="swatch-name">text-secondary</div>
+                    <div class="swatch-token">#6E6E6E</div>
+                  </div>
+                  <div class="swatch">
+                    <div class="swatch-color" style="background:#EDF2EE"></div>
+                    <div class="swatch-name">badge-bg</div>
+                    <div class="swatch-token">#EDF2EE</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Typography System
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">Display is for large headings, Body for running text, Mono for numbers, code, and labels.</span>
+          </h4>
+          <div class="section-body">
+            <div class="typography-list">
+              <div class="type-row">
+                <span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:19px;">Display</span>
+                <span class="type-spec">"Manrope" 700 38px/1.2</span>
+                <span style="font-size:11px;color:var(--d-text-secondary)">Single type family; hierarchy comes from weight, more unified.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'Manrope',sans-serif;font-weight:400;font-size:14px;">Body</span>
+                <span class="type-spec">"Manrope" 400 15px/1.55</span>
+                <span style="font-size:11px;color:var(--d-text-secondary)">Body shares the same family as Display, reducing visual noise.</span>
+              </div>
+              <div class="type-row">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;">Mono</span>
+                <span class="type-spec">"JetBrains Mono" 500 14px/1.4</span>
+                <span style="font-size:11px;color:var(--d-text-secondary)">Amounts, percentages, timestamps.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Layout Pattern
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">How key areas are organized.</span>
+          </h4>
+          <div class="section-body">
+            <p class="layout-desc">Card-based dashboard: top nav, welcome card, 2×2 metric-card grid, quick-action chips, event-card list. Strategy: use cards to naturally group information so the user’s finger/eye processes one chunk at a time.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Signature Motion
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">The most memorable micro-animation in this direction. Hover over a card, or click a quick-action chip.</span>
+          </h4>
+          <div class="section-body">
+            <p class="signature-text"><strong>Tactile Cards:</strong> All interactive cards lift slightly by 3px on hover and spread a warm, soft shadow; they sink 1px when pressed. It gives the data dashboard a tangible, physical feel, reducing the cold distance of "looking at numbers."</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4 class="section-title">
+            Interface Preview
+            <span class="info-badge" tabindex="0">i</span>
+            <span class="tooltip">A mini homepage built with real colors, type, and layout.</span>
+          </h4>
+          <div class="mockup-frame">
+            <div class="mockup-nav">
+              <div class="mockup-logo">Pulse</div>
+              <div class="mockup-nav-links">
+                <span>Home</span>
+                <span>Events</span>
+                <span>Settings</span>
+              </div>
+            </div>
+            <div class="d-body">
+              <div class="welcome-card">
+                <div class="welcome-title">Good morning—product status is normal today</div>
+                <div class="welcome-sub">Monday, August 11 · 3 metrics in healthy range</div>
+              </div>
+              <div class="metric-grid-2x2">
+                <div class="d-metric-card">
+                  <div class="d-metric-label">Revenue</div>
+                  <div class="d-metric-value">$1,240</div>
+                  <div class="d-metric-change">+12%</div>
+                </div>
+                <div class="d-metric-card">
+                  <div class="d-metric-label">Active Users</div>
+                  <div class="d-metric-value">482</div>
+                  <div class="d-metric-change">+5%</div>
+                </div>
+                <div class="d-metric-card">
+                  <div class="d-metric-label">New Sign-ups</div>
+                  <div class="d-metric-value">24</div>
+                  <div class="d-metric-change">-2%</div>
+                </div>
+                <div class="d-metric-card">
+                  <div class="d-metric-label">Events</div>
+                  <div class="d-metric-value">3.2k</div>
+                  <div class="d-metric-change">+8%</div>
+                </div>
+              </div>
+              <div class="d-actions">
+                <span class="d-chip">Connect Stripe</span>
+                <span class="d-chip">View Report</span>
+                <span class="d-chip">Set Alerts</span>
+              </div>
+              <div class="d-events">
+                <div class="d-event"><div class="mockup-event-dot" style="background:var(--d-accent)"></div><div class="mockup-event-text">New "Export CSV" feature used 38 times</div><div class="mockup-event-time">2h</div></div>
+                <div class="d-event"><div class="mockup-event-dot" style="background:var(--d-accent)"></div><div class="mockup-event-text">Stripe received a $99 subscription</div><div class="mockup-event-time">4h</div></div>
+                <div class="d-event"><div class="mockup-event-dot" style="background:var(--d-accent)"></div><div class="mockup-event-text">Page-load optimization is live</div><div class="mockup-event-time">12h</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="selection-hint">
+      <h3>How to Choose</h3>
+      <p>These four directions are <strong>rapid experience drafts</strong> for locking in color, typography, layout, and motion. Once selected, Phase 4 will produce a more complete and realistic homepage design.</p>
+      <ul>
+        <li><strong>Already happy with one direction</strong>: Reply with the letter <code>A</code> / <code>B</code> / <code>C</code> / <code>D</code>; you can also mix, e.g., <code>A’s color system + C’s masthead layout + D’s hover motion</code>.</li>
+        <li><strong>Not satisfied yet</strong>: Reply <code>None of these, try something more ××</code> (e.g., warmer / bolder / more minimal); or <code>A’s colors are nice, but the type feels too cold—swap to a more humanistic font and regenerate</code>.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zero-to-design · From 0 to 1, Build Your Design System</title>
+  <meta name="description" content="An interactive agent skill that turns fuzzy product ideas into a living design system through guided conversation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../case/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.7;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--container-padding); }
+
+    nav {
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+    .nav-link {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+    }
+    .nav-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+    .hero > *, .section > h2, .section > .lead {
+      animation: rise var(--duration-slow) var(--ease-out) both;
+    }
+    .hero > *:nth-child(2) { animation-delay: 120ms; }
+    .hero > *:nth-child(3) { animation-delay: 240ms; }
+    .section > .lead { animation-delay: 100ms; }
+    @media (prefers-reduced-motion: reduce) {
+      .hero > *, .section > h2, .section > .lead { animation: none; }
+    }
+
+    .hero { padding-block: var(--space-3xl) var(--space-2xl); }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-display);
+      line-height: 1.25;
+      margin: 0 0 var(--space-lg);
+      letter-spacing: 0.01em;
+    }
+    .hero p {
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+      max-width: 56ch;
+      margin: 0 0 var(--space-xl);
+    }
+    .install {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      color: var(--text-primary);
+    }
+    .install em { font-style: normal; color: var(--text-tertiary); }
+
+    .section { padding-block: var(--space-2xl); border-top: 1px solid var(--border-subtle); }
+    .section h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-display-sm);
+      margin: 0 0 var(--space-md);
+    }
+    .section .lead { color: var(--text-secondary); max-width: 64ch; margin: 0 0 var(--space-xl); }
+
+    .phase {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: var(--space-xl);
+      align-items: start;
+      padding: var(--space-xl) 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .phase:last-child { border-bottom: none; }
+    .phase > div:last-child {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+    .phase .num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xl);
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
+    .phase .num small {
+      display: block;
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+    .phase h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      margin: 0;
+      line-height: 1.3;
+    }
+    .phase p { font-size: var(--text-sm); color: var(--text-secondary); margin: 0; max-width: 60ch; }
+    .phase .out {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      background: var(--badge-bg);
+      border-radius: var(--radius-sm);
+      padding: 2px 8px;
+    }
+    @media (max-width: 640px) {
+      .phase { grid-template-columns: 44px 1fr; gap: var(--space-lg); }
+    }
+
+    .artifact { margin-bottom: var(--space-3xl); }
+    .artifact h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      margin: 0 0 var(--space-sm);
+    }
+    .artifact .why {
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+      max-width: 64ch;
+      margin: 0 0 var(--space-md);
+    }
+    .artifact .why strong { color: var(--accent); font-weight: 500; }
+    .frame-wrap {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface-elevated);
+    }
+    .frame-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+    }
+    .frame-bar a { color: var(--accent); text-decoration: none; }
+    .frame-bar a:hover { text-decoration: underline; }
+    iframe {
+      width: 100%;
+      height: 680px;
+      border: 0;
+      display: block;
+      background: #fff;
+    }
+    pre {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      overflow: auto;
+      max-height: 420px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .file-link {
+      display: inline-block;
+      margin-top: var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .file-link:hover { text-decoration: underline; }
+
+    .qa {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+    .qa-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: var(--text-sm);
+    }
+    .qa-row:last-child { border-bottom: none; }
+    .qa-row .q { color: var(--text-secondary); }
+    .qa-row .a { color: var(--text-primary); }
+    .qa-row .a::before {
+      content: "→";
+      font-family: var(--font-mono);
+      color: var(--accent);
+      margin-right: var(--space-sm);
+    }
+    .ref-list {
+      margin: 0 0 var(--space-md);
+      padding: 0;
+      list-style: none;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      max-width: 64ch;
+    }
+    .ref-list li {
+      padding: var(--space-xs) 0 var(--space-xs) var(--space-lg);
+      position: relative;
+    }
+    .ref-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.85em;
+      width: 8px;
+      height: 2px;
+      background: var(--accent);
+    }
+    .ref-list strong { color: var(--text-primary); font-weight: 500; }
+    pre + .why { margin-top: var(--space-lg); }
+    .user-quote {
+      margin: 0 0 var(--space-md);
+      padding: var(--space-lg) var(--space-xl);
+      background: var(--badge-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      line-height: 1.8;
+    }
+    @media (max-width: 640px) {
+      .qa-row { grid-template-columns: 1fr; gap: var(--space-xs); }
+    }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-block: var(--space-xl) var(--space-2xl);
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    footer a { color: var(--text-secondary); }
+
+    @media (max-width: 640px) {
+      iframe { height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="container">
+    <a class="nav-brand" href="#">zero-to-design</a>
+    <div style="display:flex; gap:8px;">
+      <a class="nav-link" href="/">简体中文 ↗</a>
+      <a class="nav-link" href="https://github.com/mitaraifail/zero-to-design">GitHub ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero container">
+    <h1>From a fuzzy idea<br>to a living design system.</h1>
+    <p>zero-to-design is an interactive agent skill: through guided conversation, it helps you define the product, gather references, choose directions, iterate interfaces, and ultimately produce an evolving DESIGN.md, real page designs, and motion constraints. Built for teams without a designer.</p>
+    <code class="install">npx skills add mitaraifail/zero-to-design</code>
+  </header>
+
+  <section class="section container">
+    <h2>Seven Phases, One Closed Loop</h2>
+    <p class="lead">Each phase has a clear deliverable; the next step only begins after user approval. DESIGN.md exists as a draft from Phase 4, evolves with feedback, and is finalized in Phase 7 — rather than being generated out of nowhere at the end.</p>
+    <div class="phases">
+      <div class="phase">
+        <div class="num">01</div>
+        <div>
+          <h3>Product Definition</h3>
+          <p>Eight key questions lock down “what to build and how it should feel”; answered ones are skipped, missing ones are inferred.</p>
+          <span class="out">01-product.md</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">02</div>
+        <div>
+          <h3>Reference Gathering</h3>
+          <p>Dynamically recommends four kinds of references — similar products, cross-category mood, inspiration galleries, and font libraries — and collects overall impressions plus local annotations.</p>
+          <span class="out">02-references.md</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">03</div>
+        <div>
+          <h3>Direction Selection</h3>
+          <p>Discovers your installed design skills and lets you confirm constraints, then derives 3–4 truly different directions.</p>
+          <span class="out">03-directions.html</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">04</div>
+        <div>
+          <h3>First-Screen Iteration</h3>
+          <p>Turns the chosen direction into complete interfaces for the 1–2 confirmed key screens and iterates version by version; after approval, generates DESIGN.draft.md.</p>
+          <span class="out">04-&lt;screen&gt;-v*.html + DESIGN.draft.md</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">05<small>Skippable for single-page</small></div>
+        <div>
+          <h3>Core Screen Expansion</h3>
+          <p>Expands to the smallest core screen set: real states and implementation contracts, plus a screen map and component inventory.</p>
+          <span class="out">05-&lt;screen&gt;.html · screen map · component inventory</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">06</div>
+        <div>
+          <h3>Cross-Screen Polish</h3>
+          <p>Polishes typography, spacing, color, components, responsive behavior, accessibility, and motion across screens; produces a polish log and optional dimension review pages.</p>
+          <span class="out">06-polish-log.md · dimension reviews</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">07</div>
+        <div>
+          <h3>Finalize Design System</h3>
+          <p>Finalizes the draft into the final DESIGN.md + tokens.css + assets/ and updates the AGENTS.md reference.</p>
+          <span class="out">DESIGN.md + tokens.css + assets/</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2>A Real Run · Pulse</h2>
+    <p class="lead">All artifacts below come from one complete real run: building a design system from scratch for Pulse, an indie-developer dashboard. Every artifact is a real file you can open and interact with — not screenshots.</p>
+
+    <div class="artifact">
+      <h3>Phase 1 · Product Definition: Asking the fuzzy idea the right questions</h3>
+      <p class="why">The user only said “I want to design a dashboard for indie developers,” and the skill narrowed it down to a clear product definition through 8 key questions. Below is a real excerpt from that run:</p>
+      <div class="qa">
+        <div class="qa-row"><span class="q">Q · What is the product name?</span><span class="a">Pulse</span></div>
+        <div class="qa-row"><span class="q">Q · What does it do in one sentence?</span><span class="a">Rolls revenue, user, and event data into one clear homepage so you know if anything is off in 30 seconds each morning.</span></div>
+        <div class="qa-row"><span class="q">Q · Who is the typical user?</span><span class="a">Full-stack / backend engineers, indie developers, and one-person-company founders.</span></div>
+        <div class="qa-row"><span class="q">Q · What is the user’s mindset when opening the page?</span><span class="a">“Is my product okay today?” — confirm in 30 seconds, rule out bad news, maybe spot a small win.</span></div>
+        <div class="qa-row"><span class="q">Q · What is the core differentiator vs. Stripe / GA / self-built dashboards?</span><span class="a">It proactively tells you today’s status every morning instead of waiting for you to dig.</span></div>
+        <div class="qa-row"><span class="q">Q · What atmosphere should the interface convey?</span><span class="a">Calm + Speed</span></div>
+        <div class="qa-row"><span class="q">Q · What is the target platform?</span><span class="a">Web</span></div>
+        <div class="qa-row"><span class="q">Q · Any existing brand assets?</span><span class="a">None</span></div>
+      </div>
+      <p class="why">Answered questions are not repeated; missing answers are inferred by the agent and labeled “agent inferred.” Produces <strong>01-product.md</strong>.</p>
+      <a class="file-link" href="case/01-product.md">01-product.md ↗</a>
+    </div>
+
+    <div class="artifact">
+      <h3>Phase 2 · Reference Gathering: Planting aesthetic seeds</h3>
+      <p class="why">The agent dynamically recommends four categories of references based on the product definition, asking the user to browse each and share overall impressions and local annotations:</p>
+      <ul class="ref-list">
+        <li><strong>Similar products</strong> (clear but not cold dashboards): Stripe Dashboard / Linear / Plausible Analytics / Fathom Analytics</li>
+        <li><strong>Cross-category mood</strong> (how Calm + Speed is expressed): Notion / Kinfolk / Aesop / Monocle</li>
+        <li><strong>Design inspiration galleries</strong> (layout and interaction details): Mobbin / Awwwards / Godly</li>
+        <li><strong>Typography inspiration</strong> (font pairings): Typewolf / Fontshare</li>
+      </ul>
+      <p class="why">This user gave explicit preferences early. <strong>These raw notes are recorded verbatim and become hard constraints for Phase 3</strong>:</p>
+      <blockquote class="user-quote">Light mode, no default dark mode. No purple, no blue as primary, no gradients. Continue.</blockquote>
+      <a class="file-link" href="case/02-references.md">02-references.md ↗</a>
+    </div>
+
+    <div class="artifact">
+      <h3>Phase 3 · Direction Selection: Constraints first, directions second</h3>
+      <p class="why"><strong>First, the skill scans installed design skills and asks the user to pick the main constraint</strong> — because everyone’s preferred design skill is different. The scan and selection for this run:</p>
+      <pre>✅ Available: frontend-design (main constraint), impeccable (full package),
+   animate / audit / clarify / critique / layout / polish / typeset (enhancements)
+❌ Discovered but not installed: bolder, shape, colorize, arrange, delight
+
+A. frontend-design + available enhancement skills (recommended)
+B. frontend-design only
+C. Built-in rules only
+D. Custom combination
+
+User reply: “Use impeccable as the main constraint.”</pre>
+      <p class="why"><strong>Second, the skill derives 3–4 truly different directions from 01-product.md + 02-references.md.</strong> Each direction has a layered color scheme, named fonts, layout notes, and an <strong>interactive signature action</strong> — hover over the metric cells, buttons, and headings below:</p>
+      <div class="frame-wrap">
+        <div class="frame-bar">
+          <span>03-directions.html</span>
+          <a href="case/03-directions.html" target="_blank">Open in new tab ↗</a>
+        </div>
+        <iframe src="case/03-directions.html" title="Design direction selection" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="artifact">
+      <h3>Phase 4 · First Screen(s) (Dashboard Homepage) Finalized</h3>
+      <p class="why">The user chose a direction and iterated it into a complete dashboard homepage: real metric data, full hover / active / focus states. Once approved, the skill immediately extracted DESIGN.draft.md.</p>
+      <div class="frame-wrap">
+        <div class="frame-bar">
+          <span>04-dashboard-v1.html</span>
+          <a href="case/04-dashboard-v1.html" target="_blank">Open in new tab ↗</a>
+        </div>
+        <iframe src="case/04-dashboard-v1.html" title="Dashboard homepage design" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="artifact">
+      <h3>Motion Review</h3>
+      <p class="why">Before moving on, the motion language is finalized systematically: button states, entrance animations, component animations, easing curves — <strong>all interactive, so you can try every one</strong>. After approval, the motion decisions are written back into the draft.</p>
+      <div class="frame-wrap">
+        <div class="frame-bar">
+          <span>05-motion-review.html</span>
+          <a href="case/05-motion-review.html" target="_blank">Open in new tab ↗</a>
+        </div>
+        <iframe src="case/05-motion-review.html" title="Motion review" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="artifact">
+      <h3>Phase 7 · DESIGN.md Finalized</h3>
+      <p class="why">The draft is finalized into the final design system: a multi-chapter structure covering design soul, tokens, component specs, UX constraints, red lines, and agent usage guidelines. It becomes the <strong>single source of visual truth</strong> for all subsequent development — AGENTS.md references it, and any new session’s agent must read it before starting. Here are the first two chapters from the real file:</p>
+      <pre>## 1. Design Soul
+
+Pulse is a data dashboard for indie developers. Its visual style is “editorial calm”:
+like a well-typeset morning newspaper, it builds order through hairline rules,
+whitespace, and information density rather than stacked cards and ornamentation.
+It aims to ease the low-level anxiety of “how is my product doing today?” within
+30 seconds.
+
+Color strategy: warm light gray background + deep charcoal text + forest green accent.
+Green represents “normal/healthy” and only appears in statuses and positive changes;
+warnings and errors use low-saturation warm brown / sienna red that is not harsh on the eyes.
+
+Typography strategy: Display uses Source Serif 4 to bring a human editorial quality;
+Body uses Manrope to ensure data readability; Mono uses JetBrains Mono for amounts,
+percentages, and timestamps. The numbers themselves are the protagonists; no charts required.
+
+## 2. Tokens (excerpt)
+
+| Name            | Token              | Role                                          |
+|-----------------|--------------------|-----------------------------------------------|
+| Page Background | --bg-page          | Page background, creates a warm paper feel    |
+| Primary Text    | --text-primary     | Headings, large numbers, body emphasis        |
+| Accent          | --accent           | Brand identity, positive status, primary action |
+| Card Surface    | --surface-card     | Cards, navigation, action item backgrounds    |
+| Subtle Border   | --border-subtle    | Hairline rules, card borders, dividers        |
+
+Role usage rules: --accent is for accents only; do not use it for large fills... </pre>
+      <a class="file-link" href="case/DESIGN.md">DESIGN.md ↗</a>
+      <a class="file-link" href="case/tokens.css">tokens.css ↗</a>
+    </div>
+  </section>
+
+  <footer class="container">
+    <span>zero-to-design · MIT License</span>
+    <span><a href="https://github.com/mitaraifail/zero-to-design">GitHub</a> · <a href="case/DESIGN.md">Case DESIGN.md</a></span>
+  </footer>
+</body>
+</html>

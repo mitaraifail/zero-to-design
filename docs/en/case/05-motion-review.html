@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse · Phase 5 Motion Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #F5F4F0;
+      --text-primary: #1F1F1F;
+      --text-secondary: #5C5C5C;
+      --text-tertiary: #8A8A8A;
+      --accent: #2D5A3D;
+      --accent-hover: #234A30;
+      --surface-card: #FAFAF8;
+      --surface-hover: #F2F1EC;
+      --border-subtle: #DEDCD5;
+      --border-strong: #C8C6BF;
+      --status-ok: #2D5A3D;
+      --status-warn: #9A6B2B;
+      --status-error: #8B3A2E;
+      --badge-bg: #E8EDE9;
+
+      --font-display: "Source Serif 4", Georgia, serif;
+      --font-body: "Manrope", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+      --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 200ms;
+      --duration-slow: 350ms;
+      --duration-slower: 500ms;
+
+      --speed-multiplier: 1;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-page);
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Reduce motion toggle */
+    body.reduce-motion * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    body.reduce-motion .rule-demo::after,
+    body.reduce-motion .rule-demo-v::after {
+      animation: none !important;
+      transform: scaleX(1) !important;
+    }
+
+    /* Speed adjustment */
+    body.slow-2x * {
+      animation-duration: calc(0.01ms / var(--speed-multiplier)) !important;
+      transition-duration: calc(0.01ms / var(--speed-multiplier)) !important;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* Header */
+    .review-header {
+      padding: 48px 0 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 40px;
+    }
+
+    .review-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 600;
+      line-height: 1.1;
+      margin: 0 0 12px;
+    }
+
+    .review-header p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 680px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+      padding: 16px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+    }
+
+    .control-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .control-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .control-btn.active {
+      color: #FFFFFF;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .control-btn.active:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Section */
+    .motion-section {
+      margin-bottom: 56px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Demo grid */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .demo-grid { grid-template-columns: 1fr; }
+      .container { padding-left: 20px; padding-right: 20px; }
+    }
+
+    .demo-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .demo-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .demo-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 12px;
+    }
+
+    /* 1. Entrance animations - Rules Draw */
+    .rule-demo {
+      position: relative;
+      height: 60px;
+      background: var(--bg-page);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .rule-demo::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 12px;
+      width: 100%;
+      height: 1px;
+      background: var(--accent);
+      transform-origin: left;
+      animation: ruleDrawH var(--duration-slower) var(--ease-out) infinite;
+    }
+
+    .rule-demo-v {
+      position: relative;
+      width: 60px;
+      height: 100px;
+      background: var(--bg-page);
+      border-radius: 8px;
+    }
+
+    .rule-demo-v::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100%;
+      background: var(--accent);
+      transform-origin: top;
+      animation: ruleDrawV var(--duration-slower) var(--ease-out) infinite;
+    }
+
+    @keyframes ruleDrawH {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes ruleDrawV {
+      from { transform: scaleY(0); }
+      to { transform: scaleY(1); }
+    }
+
+    .stagger-demo {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      height: 80px;
+    }
+
+    .stagger-bar {
+      width: 24px;
+      background: var(--accent);
+      border-radius: 4px 4px 0 0;
+      opacity: 0;
+      animation: barGrow 0.6s var(--ease-out) forwards;
+    }
+
+    .stagger-bar:nth-child(1) { height: 40px; animation-delay: 0.05s; }
+    .stagger-bar:nth-child(2) { height: 60px; animation-delay: 0.15s; }
+    .stagger-bar:nth-child(3) { height: 35px; animation-delay: 0.25s; }
+    .stagger-bar:nth-child(4) { height: 70px; animation-delay: 0.35s; }
+    .stagger-bar:nth-child(5) { height: 50px; animation-delay: 0.45s; }
+
+    @keyframes barGrow {
+      from { opacity: 0; transform: scaleY(0); }
+      to { opacity: 1; transform: scaleY(1); }
+    }
+
+    /* 2. Hover states */
+    .hover-metric {
+      background: var(--bg-page);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 20px;
+      transition: background var(--duration-fast) var(--ease-out);
+      cursor: pointer;
+    }
+
+    .hover-metric:hover {
+      background: var(--surface-hover);
+    }
+
+    .hover-metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .hover-metric-value {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .hover-event {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      padding: 14px 12px;
+      border-bottom: 1px dotted var(--border-subtle);
+      border-radius: 8px;
+      transition: background var(--duration-fast) var(--ease-out);
+      cursor: pointer;
+      align-items: baseline;
+    }
+
+    .hover-event:hover {
+      background: var(--surface-hover);
+    }
+
+    .hover-event-time {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .hover-event-text {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .hover-event-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--badge-bg);
+      color: var(--accent);
+    }
+
+    .hover-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform var(--duration-fast) var(--ease-out),
+                  box-shadow var(--duration-fast) var(--ease-out),
+                  border-color var(--duration-fast) var(--ease-out);
+    }
+
+    .hover-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-color: var(--border-strong);
+    }
+
+    .hover-card:active {
+      transform: translateY(0);
+    }
+
+    .hover-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--badge-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .hover-card-text {
+      flex: 1;
+    }
+
+    .hover-card-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .hover-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .hover-card-arrow {
+      color: var(--text-tertiary);
+      transition: transform var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out);
+    }
+
+    .hover-card:hover .hover-card-arrow {
+      transform: translateX(3px);
+      color: var(--accent);
+    }
+
+    /* 3. Pressed states */
+    .press-demo {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .press-btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      color: #FFFFFF;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      transition: transform var(--duration-fast) var(--ease-out),
+                  background var(--duration-fast) var(--ease-out);
+    }
+
+    .press-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .press-btn:active {
+      transform: scale(0.97);
+    }
+
+    .press-card {
+      flex: 1;
+      padding: 16px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform var(--duration-fast) var(--ease-out);
+    }
+
+    .press-card:active {
+      transform: translateY(1px);
+    }
+
+    /* 4. Focus states */
+    .focus-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .focus-link {
+      padding: 10px 14px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      width: fit-content;
+    }
+
+    .focus-link:hover {
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    /* 5. Easing curves */
+    .easing-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .easing-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .easing-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .easing-track {
+      height: 40px;
+      background: var(--bg-page);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .easing-ball {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: -10px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: slideAcross 1.2s var(--ease-out) infinite;
+    }
+
+    .easing-ball.bounce {
+      animation-timing-function: var(--ease-bounce);
+      background: var(--status-error);
+    }
+
+    @keyframes slideAcross {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(calc(100% - 20px)); }
+      100% { transform: translateX(0); }
+    }
+
+    .easing-curve {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* 6. Wrong vs right */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .compare-item {
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .compare-item.wrong {
+      background: #FDF8F8;
+      border-color: #E8D5D2;
+    }
+
+    .compare-item.right {
+      background: var(--surface-card);
+    }
+
+    .compare-label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .compare-item.wrong .compare-label { color: var(--status-error); }
+    .compare-item.right .compare-label { color: var(--status-ok); }
+
+    .compare-btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: transform var(--duration-fast) var(--ease-out);
+    }
+
+    .compare-btn.wrong {
+      background: var(--status-error);
+      color: #FFFFFF;
+      transition-timing-function: var(--ease-bounce);
+    }
+
+    .compare-btn.wrong:active {
+      transform: scale(0.9);
+    }
+
+    .compare-btn.right {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .compare-btn.right:active {
+      transform: scale(0.97);
+    }
+
+    .compare-note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .review-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .spec-table th,
+    .spec-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .spec-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .spec-table td.mono {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="review-header">
+      <h1>Pulse · Motion Review</h1>
+      <p>This page is used to experience and confirm the motion language of the Pulse homepage. All demos are based on the Phase 4 approved design system.</p>
+    </header>
+
+    <div class="controls" role="toolbar" aria-label="Motion controls">
+      <button class="control-btn" id="toggle-motion">Reduce motion</button>
+      <button class="control-btn" id="speed-1x" data-speed="1">1× speed</button>
+      <button class="control-btn" id="speed-2x" data-speed="0.5">2× slow</button>
+      <button class="control-btn" id="speed-4x" data-speed="0.25">4× slow</button>
+      <button class="control-btn" id="replay-entrance">Replay entrance</button>
+    </div>
+
+    <!-- 1. Entrance animations -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Entrance Animations</h2>
+        <span class="section-desc">How elements enter the viewport on page load</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-label">Horizontal hairline rule</div>
+          <div class="rule-demo"></div>
+          <div class="demo-hint">Dividers in the hero, metric bands, and section bottoms draw from left to right over 0.8s.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Vertical hairline rule</div>
+          <div class="rule-demo-v"></div>
+          <div class="demo-hint">Vertical lines between metrics draw from top to bottom over 0.8s.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Staggered entrance</div>
+          <div class="stagger-demo">
+            <div class="stagger-bar"></div>
+            <div class="stagger-bar"></div>
+            <div class="stagger-bar"></div>
+            <div class="stagger-bar"></div>
+            <div class="stagger-bar"></div>
+          </div>
+          <div class="demo-hint">When multiple elements enter at once, delay each by 50–100ms to avoid a mechanical feel.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">No entrance (control)</div>
+          <div class="hover-metric">
+            <div class="hover-metric-label">Appears directly</div>
+            <div class="hover-metric-value">482</div>
+          </div>
+          <div class="demo-hint">Key numbers skip fancy entrances to preserve the "glanceable" sense of speed.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Hover states -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Hover States</h2>
+        <span class="section-desc">Feedback on mouse hover</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-label">Metric cell</div>
+          <div class="hover-metric">
+            <div class="hover-metric-label">Today's revenue</div>
+            <div class="hover-metric-value">$1,240</div>
+          </div>
+          <div class="demo-hint">150ms background lightens, hinting it's clickable for drill-down.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Event list item</div>
+          <div>
+            <div class="hover-event">
+              <span class="hover-event-time">08:42</span>
+              <span class="hover-event-text">Stripe received an annual subscription</span>
+              <span class="hover-event-tag">Revenue</span>
+            </div>
+            <div class="hover-event">
+              <span class="hover-event-time">07:15</span>
+              <span class="hover-event-text">CSV export is frequently used</span>
+              <span class="hover-event-tag">Product</span>
+            </div>
+          </div>
+          <div class="demo-hint">150ms background lightens with rounded corners, maintaining reading continuity.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Quick-action card</div>
+          <div class="hover-card">
+            <div class="hover-card-icon">⊕</div>
+            <div class="hover-card-text">
+              <div class="hover-card-title">Connect data source</div>
+              <div class="hover-card-desc">Connect Stripe, database, or GA</div>
+            </div>
+            <div class="hover-card-arrow">→</div>
+          </div>
+          <div class="demo-hint">Lift 2px + light shadow + darker border + arrow shifts right 3px, 150ms.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Pressed states -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Pressed States</h2>
+        <span class="section-desc">Instant feedback on click / touch</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-label">Button press</div>
+          <div class="press-demo">
+            <button class="press-btn">Save settings</button>
+          </div>
+          <div class="demo-hint">Scales down to 97% on press, 150ms ease-out, springs back on release.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Card press</div>
+          <div class="press-card">
+            <div class="hover-card-title">Quick-action card</div>
+            <div class="hover-card-desc">Sinks 1px on press, canceling the lift</div>
+          </div>
+          <div class="demo-hint">Creates a physical "pressed" contrast with the hover lift.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Focus states -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Focus States</h2>
+        <span class="section-desc">Visibility during keyboard navigation</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-label">Link focus</div>
+          <div class="focus-demo">
+            <a href="#" class="focus-link">Home</a>
+            <a href="#" class="focus-link">Events</a>
+            <a href="#" class="focus-link">Settings</a>
+          </div>
+          <div class="demo-hint">Press Tab to test: 2px green outline, offset 2px, clearly visible.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">Button focus</div>
+          <div class="press-demo">
+            <button class="press-btn">Focusable button</button>
+          </div>
+          <div class="demo-hint">Same 2px green outline, not relying on color change.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Easing curves -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Easing Curves</h2>
+        <span class="section-desc">All motion uses the same natural deceleration curve</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-label">ease-out (recommended)</div>
+          <div class="easing-demo">
+            <div class="easing-row">
+              <span class="easing-name">cubic-bezier</span>
+              <div class="easing-track">
+                <div class="easing-ball"></div>
+              </div>
+            </div>
+            <div class="easing-curve">(0.25, 1, 0.5, 1) · Natural deceleration, fast then slow</div>
+          </div>
+          <div class="demo-hint">Used for hover, entrance, and press. The only easing in Pulse.</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-label">bounce (disabled)</div>
+          <div class="easing-demo">
+            <div class="easing-row">
+              <span class="easing-name">cubic-bezier</span>
+              <div class="easing-track">
+                <div class="easing-ball bounce"></div>
+              </div>
+            </div>
+            <div class="easing-curve">(0.34, 1.56, 0.64, 1) · Bounce effect, disabled</div>
+          </div>
+          <div class="demo-hint">Bounce / elastic feels dated and distracting. Not used in Pulse.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Wrong vs right -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Wrong vs Right</h2>
+        <span class="section-desc">A visual comparison of motion choices</span>
+      </header>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="compare-grid">
+            <div class="compare-item wrong">
+              <div class="compare-label">Wrong: bounce press</div>
+              <button class="compare-btn wrong">Save</button>
+              <div class="compare-note">Overshoots like a "bounce", disrupting action confirmation.</div>
+            </div>
+            <div class="compare-item right">
+              <div class="compare-label">Right: ease-out press</div>
+              <button class="compare-btn right">Save</button>
+              <div class="compare-note">Slight 3% shrink, clean and decisive, strong confirmation.</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-card">
+          <div class="compare-grid">
+            <div class="compare-item wrong">
+              <div class="compare-label">Wrong: long flashing</div>
+              <div class="hover-metric" style="animation: none;">
+                <div class="hover-metric-label">Alert</div>
+                <div class="hover-metric-value">-35%</div>
+              </div>
+              <div class="compare-note">Persistent flashing increases anxiety. Pulse uses steady highlighting instead.</div>
+            </div>
+            <div class="compare-item right">
+              <div class="compare-label">Right: steady highlight</div>
+              <div class="hover-metric" style="border-color: var(--status-error);">
+                <div class="hover-metric-label" style="color: var(--status-error);">Alert</div>
+                <div class="hover-metric-value" style="color: var(--status-error);">-35%</div>
+              </div>
+              <div class="compare-note">Uses border + text color to signal anomaly. No flashing, no glare.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Motion spec table -->
+    <section class="motion-section">
+      <header class="section-header">
+        <h2 class="section-title">Motion Specs</h2>
+        <span class="section-desc">Formal parameters written into DESIGN.md</span>
+      </header>
+      <div class="demo-card">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Duration</th>
+              <th>Easing</th>
+              <th>Properties</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hover feedback</td>
+              <td class="mono">150ms</td>
+              <td class="mono">cubic-bezier(0.25, 1, 0.5, 1)</td>
+              <td class="mono">background, transform, border-color</td>
+            </tr>
+            <tr>
+              <td>Press feedback</td>
+              <td class="mono">150ms</td>
+              <td class="mono">cubic-bezier(0.25, 1, 0.5, 1)</td>
+              <td class="mono">transform: scale(0.97)</td>
+            </tr>
+            <tr>
+              <td>Entrance animation</td>
+              <td class="mono">350–500ms</td>
+              <td class="mono">cubic-bezier(0.25, 1, 0.5, 1)</td>
+              <td class="mono">transform, opacity</td>
+            </tr>
+            <tr>
+              <td>Arrow micro-shift</td>
+              <td class="mono">200ms</td>
+              <td class="mono">cubic-bezier(0.25, 1, 0.5, 1)</td>
+              <td class="mono">transform: translateX(3px)</td>
+            </tr>
+            <tr>
+              <td>Hairline draw</td>
+              <td class="mono">800ms</td>
+              <td class="mono">cubic-bezier(0.25, 1, 0.5, 1)</td>
+              <td class="mono">transform: scaleX / scaleY</td>
+            </tr>
+            <tr>
+              <td>Reduce motion</td>
+              <td class="mono">0.01ms</td>
+              <td class="mono">linear</td>
+              <td class="mono">All animations forced off</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="review-footer">
+      <p>All motion above follows: animate only transform and opacity; do not block interaction; respect prefers-reduced-motion.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Reduce motion toggle
+    const motionBtn = document.getElementById('toggle-motion');
+    motionBtn.addEventListener('click', () => {
+      document.body.classList.toggle('reduce-motion');
+      motionBtn.classList.toggle('active');
+      motionBtn.textContent = document.body.classList.contains('reduce-motion') ? 'Restore motion' : 'Reduce motion';
+    });
+
+    // Speed control
+    const speedBtns = document.querySelectorAll('[data-speed]');
+    speedBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.body.style.setProperty('--speed-multiplier', btn.dataset.speed);
+        // Retrigger animation
+        document.querySelectorAll('.stagger-bar, .easing-ball').forEach(el => {
+          el.style.animation = 'none';
+          el.offsetHeight;
+          el.style.animation = '';
+        });
+      });
+    });
+
+    // Replay entrance
+    document.getElementById('replay-entrance').addEventListener('click', () => {
+      document.querySelectorAll('.stagger-bar, .rule-demo, .rule-demo-v').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+      });
+    });
+  </script>
+</body>
+</html>
